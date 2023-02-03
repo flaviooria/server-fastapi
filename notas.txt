@@ -1,0 +1,10 @@
+Preguntas para hacer en la charla sobre fastapi
+
+1. Creen que la excepción de http funcionara haciendo un return
+    - No, no funciona como debe, toda excepción tiene que se siempre lanzada y para eso
+    se usa la palabra reservad raise
+
+2. Saben la diferencia ante un Path y una Query en un Endpoint
+    Path, es un parametro que se la pasa en el Endpoint separado por una / y es obligatoria
+
+    Query, es un o son parametros que van después ?q y separados por &p y pueden ser o no obligatorias.

@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Path, Query
+from fastapi import FastAPI, Path, Query, HTTPException, status
 from fastapi.routing import APIRoute
 
 from operator import attrgetter
 
 from entities import UserEntity
 from utils import search_user
+from exceptions import users_except
 
 # Instantiate FastApi
 app = FastAPI()
@@ -17,7 +18,7 @@ users_list = [
 ]
 
 
-@app.get('/api')
+@app.get('/api',status_code=200)
 async def root():
     routes = []
     for route in app.routes:    
@@ -26,38 +27,45 @@ async def root():
 
     return routes
 
-@app.get('/users')
+@app.get('/users',status_code=200)
 async def users():
     return users_list
 
-# Endpoint con parth
-@app.get('/users/{id}')
+
+# Endpoint con path
+@app.get('/users/{id}',status_code=200)
 async def getUsersById(id: int = Path(default=...,alias='id',title='User id',example=1)):
-    try:
-        founded_user = list(filter(lambda user: user.id == id,users_list))
-        return founded_user
-    except:
-        return {'error': 'No se ha encontrado el usuario'}
+    founded_user = list(filter(lambda user: user.id == id,users_list))
+
+    if len(founded_user) == 0:
+        # Usamos el http exception para generar una excepción, esta recibe 3 párametros
+        # el código de estado, detail = que es el mensaje, si no recibe nada, devuelve un mesanje respecto al código de estdo que se le haya pasado.
+
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=users_except.MSG_ERROR_USER_NOT_FOUND)
+    
+    return founded_user
+
 
 
 # Endpoint con query
-@app.get('/users/age/')
+@app.get('/users/age/',status_code=200)
 async def getUsersByAge(age: int | None = Query(default=None,alias='age',title='User\'s age')):
-    try:
-        if not age:
-            return users_list
+    if not age:
+        return users_list
 
-        return list(filter(lambda user: user.age == age,users_list))
-    except:
-        return {'error': 'No se ha encontrado el usuario'}
+    users = list(filter(lambda user: user.age == age,users_list))
 
+    if len(users) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=users_except.MSG_ERROR_USER_NOT_FOUND)
+    
+    return users
 
 #POST
-@app.post('/users')
+@app.post('/users',status_code=201)
 async def insertUser(user: UserEntity) -> list[UserEntity]:
     name, surname, url, age = attrgetter('name','surname','url','age')(user)
     if not name and surname and url and age:
-        return {'error': 'Campos invalidos, asegurate de completar todos'}
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail='Fields not indicated or empty in the body')
 
     # Get the last user id
     id_generated = users_list[-1].id + 1
@@ -67,7 +75,7 @@ async def insertUser(user: UserEntity) -> list[UserEntity]:
     return users_list
 
 # PUT 
-@app.put('/users')
+@app.put('/users',status_code=200)
 async def user(id: int = Query(default=...,alias='id',title='User\'s id'), *, user: UserEntity):
     founded = -1
     for index, saver_user in enumerate(users_list):
