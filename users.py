@@ -1,26 +1,19 @@
-from fastapi import FastAPI, Path, Query, Body
-from fastapi.requests import Request
-from pydantic import BaseModel
+from fastapi import FastAPI, Path, Query
 from fastapi.routing import APIRoute
 
+from operator import attrgetter
+
+from entities import UserEntity
+from utils import search_user
+
+# Instantiate FastApi
 app = FastAPI()
-
-# Creamos nuestras entidades, empezamos por user
-
-
-class User(BaseModel):
-    id: int 
-    name: str
-    surname: str
-    url: str
-    age: int 
-
 
 # User's list
 users_list = [
-    User(id=1,name='Flavio', surname='Oria', url='www.google.com', age=23),
-    User(id=2,name='Cesar', surname='Levano', url='www.google.com', age=26),
-    User(id=3,name='Gabi', surname='Oria', url='www.google.com', age=23)
+    UserEntity(id=1,name='Flavio', surname='Oria', url='www.google.com', age=23),
+    UserEntity(id=2,name='Cesar', surname='Levano', url='www.google.com', age=26),
+    UserEntity(id=3,name='Gabi', surname='Oria', url='www.google.com', age=23)
 ]
 
 
@@ -61,21 +54,44 @@ async def getUsersByAge(age: int | None = Query(default=None,alias='age',title='
 
 #POST
 @app.post('/users')
-async def insertUser(user: User):
-    print(user.id)
-    type_user = type(search_user(user.id,users_list))
-    if type_user == User:
-        return {'error': 'Usuario ya existe'}
-    
+async def insertUser(user: UserEntity) -> list[UserEntity]:
+    name, surname, url, age = attrgetter('name','surname','url','age')(user)
+    if not name and surname and url and age:
+        return {'error': 'Campos invalidos, asegurate de completar todos'}
+
+    # Get the last user id
+    id_generated = users_list[-1].id + 1
+    user.id = id_generated
+
     users_list.append(user)
     return users_list
 
+# PUT 
+@app.put('/users')
+async def user(id: int = Query(default=...,alias='id',title='User\'s id'), *, user: UserEntity):
+    founded = -1
+    for index, saver_user in enumerate(users_list):
+        if saver_user.id != id:
+            continue
+        
+        user.id = id
+        users_list[index] = user
+        founded = index
+        break
 
-# utils 
+    if founded == -1:
+        return {'error': 'No se ha acutalizado el usuario'}
+    
+    return [users_list[founded]]
+    
+# DELETE
+@app.delete('/users')
+async def user(id: int = Query(default=...,alias='id',title='User\'s id')):
+    foundedUser = search_user(id,users_list)
+    
+    if not type(foundedUser) == UserEntity:
+        return {'error': 'Usuario no eliminado'}
+    
+    users_list.remove(foundedUser)
 
-def search_user(id: int,users_list: list[User]) -> User:
-    users = list(filter(lambda user: user.id == id,users_list))
-    try: 
-        return users[0]
-    except:
-        return {'error': 'No se ha encontrado el usuario'}
+    return users_list

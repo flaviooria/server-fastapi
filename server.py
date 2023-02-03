@@ -3,7 +3,7 @@ from fastapi import FastAPI, Query, Path, status
 from fastapi.requests import Request
 from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel
-from utils import read_json
+from utils.utils import read_json
 
 # FastAPI es una clase de Python que provee toda la funcionalidad para tu API.
 
