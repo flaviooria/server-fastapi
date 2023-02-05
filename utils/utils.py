@@ -1,8 +1,8 @@
 import json
 
 
-def read_json() -> list | dict:
-    with open('users.json') as file:
+def read_json(path: str) -> list | dict:
+    with open(path) as file:
         data = json.load(file)
 
     return data

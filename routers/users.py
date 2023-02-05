@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Path, Query, HTTPException, status
-from fastapi.routing import APIRoute
+from fastapi import APIRouter, Path, Query, HTTPException, status
+
 
 from operator import attrgetter
 
@@ -8,7 +8,7 @@ from utils import search_user
 from exceptions import users_except
 
 # Instantiate FastApi
-app = FastAPI()
+router = APIRouter(prefix='/users',tags=['users'])
 
 # User's list
 users_list = [
@@ -18,22 +18,13 @@ users_list = [
 ]
 
 
-@app.get('/api',status_code=200)
-async def root():
-    routes = []
-    for route in app.routes:    
-        if isinstance(route,APIRoute):
-            routes.append({'path': route.path_format, 'method': route.methods})
-
-    return routes
-
-@app.get('/users',status_code=200)
+@router.get('/',status_code=200,response_model=list[UserEntity])
 async def users():
     return users_list
 
 
 # Endpoint con path
-@app.get('/users/{id}',status_code=200)
+@router.get('/{id}',status_code=200,response_model=list[UserEntity])
 async def getUsersById(id: int = Path(default=...,alias='id',title='User id',example=1)):
     founded_user = list(filter(lambda user: user.id == id,users_list))
 
@@ -48,7 +39,7 @@ async def getUsersById(id: int = Path(default=...,alias='id',title='User id',exa
 
 
 # Endpoint con query
-@app.get('/users/age/',status_code=200)
+@router.get('/age',status_code=200,response_model=list[UserEntity])
 async def getUsersByAge(age: int | None = Query(default=None,alias='age',title='User\'s age')):
     if not age:
         return users_list
@@ -61,7 +52,7 @@ async def getUsersByAge(age: int | None = Query(default=None,alias='age',title='
     return users
 
 #POST
-@app.post('/users',status_code=201)
+@router.post('/',status_code=201,response_model=list[UserEntity])
 async def insertUser(user: UserEntity) -> list[UserEntity]:
     name, surname, url, age = attrgetter('name','surname','url','age')(user)
     if not name and surname and url and age:
@@ -75,7 +66,7 @@ async def insertUser(user: UserEntity) -> list[UserEntity]:
     return users_list
 
 # PUT 
-@app.put('/users',status_code=200)
+@router.put('/',status_code=200,response_model=list[UserEntity])
 async def user(id: int = Query(default=...,alias='id',title='User\'s id'), *, user: UserEntity):
     founded = -1
     for index, saver_user in enumerate(users_list):
@@ -93,7 +84,7 @@ async def user(id: int = Query(default=...,alias='id',title='User\'s id'), *, us
     return [users_list[founded]]
     
 # DELETE
-@app.delete('/users')
+@router.delete('/')
 async def user(id: int = Query(default=...,alias='id',title='User\'s id')):
     foundedUser = search_user(id,users_list)
     

@@ -3,13 +3,22 @@ from fastapi import FastAPI, Query, Path, status
 from fastapi.requests import Request
 from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel
-from utils.utils import read_json
+from utils import read_json
+from fastapi.middleware.cors import CORSMiddleware
 
 # FastAPI es una clase de Python que provee toda la funcionalidad para tu API.
 
 # Incializamos el server instanciando fastA api
 app = FastAPI(title='Server webhook', version='0.1.0')
-users = []
+users = read_json()
+
+# Vamos añadir nuestros cors al nuestra api para resolver las peticiones que haga un cliente
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=['*'],
+    allow_headers=["*"]
+)
 
 # routings
 
@@ -108,4 +117,8 @@ def getUsersData(data_id: int = Path(default=..., title='Id of get data', ge=1.0
 
     return JSONResponse(content={'data_id': data_id, 'data': users},status_code=200)
 
+@app.get('/users/name/')
+def getUsersByName(name: str = Query(default=...,title='Name to filter users')):
+    filtered_users = list(filter(lambda user: name.lower() in user['first_name'].lower(),users))
 
+    return JSONResponse(content=filtered_users, status_code=200)
