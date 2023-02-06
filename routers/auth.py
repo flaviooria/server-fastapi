@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from operator import attrgetter
 
 from entities import UserDBEntity, UserAuthEntity
 from exceptions import users_except
