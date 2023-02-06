@@ -1,1 +1,1 @@
-from entities.user_entities import User as UserEntity
+from entities.user_entities import UserBase as UserEntity

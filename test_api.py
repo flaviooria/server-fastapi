@@ -2,13 +2,14 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
-from routers import users,products
+from routers import auth, users, products
 
 app = FastAPI()
 
 # Add routes
 app.include_router(users.router)
 app.include_router(products.router)
+app.include_router(auth.router)
 
 # Add static files
 # Para añadir archivos estaticos se utiliza el método mount. Tiene 3 párametros
