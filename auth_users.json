@@ -1,0 +1,23 @@
+{
+  "flavio_dev": {
+    "username": "flavio_dev",
+    "email": "flavio@dev",
+    "disabled": true,
+    "password": "12345abc",
+    "token": "-102-108-97-118-105-111-95-100-101-118-49-50-51-52-53-97-98-99"
+  },
+  "valki_dev": {
+    "username": "valki_dev",
+    "email": "valki@dev",
+    "disabled": false,
+    "password": "12345def",
+    "token": "-118-97-108-107-105-95-100-101-118-49-50-51-52-53-100-101-102"
+  },
+  "carlos_dev": {
+    "username": "carlos_dev",
+    "email": "carlos@dev",
+    "disabled": null,
+    "password": "carlos123",
+    "token": "-99-97-114-108-111-115-95-100-101-118-99-97-114-108-111-115-49-50-51"
+  }
+}

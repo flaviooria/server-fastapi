@@ -4,7 +4,7 @@ from fastapi import APIRouter, Path, Query, HTTPException, status
 from operator import attrgetter
 
 from entities import UserEntity
-from utils import search_user
+from utils import searchUser
 from exceptions import users_except
 
 # Instantiate FastApi
@@ -86,7 +86,7 @@ async def user(id: int = Query(default=...,alias='id',title='User\'s id'), *, us
 # DELETE
 @router.delete('/')
 async def user(id: int = Query(default=...,alias='id',title='User\'s id')):
-    foundedUser = search_user(id,users_list)
+    foundedUser = searchUser(id,users_list)
     
     if not type(foundedUser) == UserEntity:
         return {'error': 'Usuario no eliminado'}

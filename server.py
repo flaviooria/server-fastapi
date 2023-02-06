@@ -3,14 +3,14 @@ from fastapi import FastAPI, Query, Path, status
 from fastapi.requests import Request
 from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel
-from utils import read_json
+from utils import readJson
 from fastapi.middleware.cors import CORSMiddleware
 
 # FastAPI es una clase de Python que provee toda la funcionalidad para tu API.
 
 # Incializamos el server instanciando fastA api
 app = FastAPI(title='Server webhook', version='0.1.0')
-users = read_json()
+users = readJson()
 
 # Vamos añadir nuestros cors al nuestra api para resolver las peticiones que haga un cliente
 app.add_middleware(
@@ -37,7 +37,7 @@ def hello_world():
 # Routing path => Aquí le decimos a nuestra ruta que va a recibir un parametro id es requerido, este path no puede ser opcional
 @app.get('/users/{userId}')  # => http://localhost:3000/users/1
 def allUsers(userId: int):
-    users = read_json()
+    users = readJson()
     if not userId:
         return JSONResponse(content={'data': 'user not found'}, status_code=404)
 
@@ -50,7 +50,7 @@ def allUsers(userId: int):
 
 @app.get('/users/')  # => http://localhost:3000/users/?limit=5
 def allUsersWithLimit(limit: int | None = None):
-    users = read_json()
+    users = readJson()
     if limit:
         users = users[:limit]
 
@@ -89,7 +89,7 @@ def createUser(user: UserModel):
 # Si queremos que nuestro parametro sea requerido,debemos no añadir ningun valor al default,añadir "..." o importar Required y asignarselo al default
 @app.get('/users/gender/')
 async def getUsersByGender(gender: Gender = Query(default=..., description='Gender of user', title='gender', example='Male', alias='gender-user')):
-    users = read_json()
+    users = readJson()
     founded_users = list(
         filter(lambda user: user['gender'].lower() == gender.lower(), users))
     return JSONResponse(content=founded_users, status_code=200)
@@ -108,7 +108,7 @@ def getUserById(id: int = Path(default=..., alias='id_param', title='Id of user'
 
 @app.get('/users/data/{data_id}',response_class=JSONResponse)
 def getUsersData(data_id: int = Path(default=..., title='Id of get data', ge=1.0), gender: Gender = Query(default=None, example=Gender.female, title='Get users by gender filter'), limit: int = Query(default=10,title='limit of results users')):
-    users = read_json()
+    users = readJson()
     if gender:
         users = list(filter(lambda user:user['gender'] == gender,users))
     

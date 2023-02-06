@@ -11,7 +11,8 @@ class UserBase(BaseModel):
 class UserAuth(BaseModel):
     username: str
     email: str
-    disabled: bool
+    disabled: bool | None
 
 class UserDB(UserAuth):
     password: str
+    token: str | None
